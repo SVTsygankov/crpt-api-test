@@ -22,10 +22,9 @@ public class CrptApi {
 
     private static final Logger logger = Logger.getLogger(CrptApi.class.getName());
 
-    // Базовый URL для создания документов
     private static final String BASE_URL = "https://ismp.crpt.ru/api/v3/lk/documents/create";
 
-    // Товарная группа по умолчанию (можно задать через setter)
+    // Товарная группа по умолчанию
     private String productGroup = "milk"; // например, milk, shoes, tobacco и т.д.
 
     private final int requestLimit;
@@ -53,12 +52,6 @@ public class CrptApi {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Устанавливает токен авторизации.
-     * Должен быть вызван до первого вызова createDocument().
-     *
-     * @param authToken Bearer-токен
-     */
     public void setAuthToken(String authToken) {
         if (authToken == null || authToken.trim().isEmpty()) {
             throw new IllegalArgumentException("authToken cannot be null or empty");
@@ -66,11 +59,6 @@ public class CrptApi {
         this.authToken = authToken.strip();
     }
 
-    /**
-     * Устанавливает товарную группу (pg), например: "milk", "shoes", "tobacco".
-     *
-     * @param productGroup товарная группа
-     */
     public void setProductGroup(String productGroup) {
         if (productGroup == null || productGroup.trim().isEmpty()) {
             throw new IllegalArgumentException("productGroup cannot be null or empty");
@@ -92,10 +80,8 @@ public class CrptApi {
             throw new IllegalStateException("authToken is not set. Call setAuthToken() before using the API.");
         }
 
-        // Учитываем рейт-лимит
         rateLimiter.acquire();
 
-        // Собираем тело запроса
         DocumentRequest requestDto = new DocumentRequest("LP_INTRODUCE_GOODS", "MANUAL", document, signature);
         String jsonBody;
         try {
@@ -104,10 +90,8 @@ public class CrptApi {
             throw new IllegalArgumentException("Failed to serialize document to JSON", e);
         }
 
-        // Формируем URL с параметром pg
         String url = BASE_URL + "?pg=" + productGroup;
 
-        // Создаём HTTP-запрос
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json;charset=UTF-8")
@@ -164,18 +148,14 @@ public class CrptApi {
         }
     }
 
-    // === Внутренний record для тела запроса ===
-
     private record DocumentRequest(
             String type,
             String documentFormat,
             Object content,
             String signature
-    ) {
-        // Jackson требует, чтобы поля были видны
-    }
+    ) {}
 
-    // === Потокобезопасный Rate Limiter (Token Bucket) ===
+    //  Rate Limiter (Token Bucket)
 
     private static class RateLimiter {
         private final int maxRequests;
