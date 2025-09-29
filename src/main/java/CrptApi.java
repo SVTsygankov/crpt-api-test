@@ -23,7 +23,8 @@ public class CrptApi {
     private static final Logger logger = Logger.getLogger(CrptApi.class.getName());
 
     // Базовый URL для создания документов
-    private static final String BASE_URL = "https://ismp.crpt.ru/api/v3/lk/documents/create";
+//    private static final String BASE_URL = "https://ismp.crpt.ru/api/v3/lk/documents/create";
+    private final String baseUrl;
 
     // Товарная группа по умолчанию (можно задать через setter)
     private String productGroup = "milk"; // например, milk, shoes, tobacco и т.д.
@@ -36,7 +37,8 @@ public class CrptApi {
 
     private volatile String authToken;
 
-    public CrptApi(TimeUnit timeUnit, int requestLimit) {
+    public CrptApi(String baseUrl, TimeUnit timeUnit, int requestLimit) {
+        this.baseUrl = baseUrl;
         if (timeUnit == null) {
             throw new IllegalArgumentException("timeUnit cannot be null");
         }
@@ -92,22 +94,20 @@ public class CrptApi {
             throw new IllegalStateException("authToken is not set. Call setAuthToken() before using the API.");
         }
 
-        // Учитываем рейт-лимит
         rateLimiter.acquire();
 
-        // Собираем тело запроса
         DocumentRequest requestDto = new DocumentRequest("LP_INTRODUCE_GOODS", "MANUAL", document, signature);
         String jsonBody;
+
+
         try {
             jsonBody = objectMapper.writeValueAsString(requestDto);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to serialize document to JSON", e);
         }
 
-        // Формируем URL с параметром pg
-        String url = BASE_URL + "?pg=" + productGroup;
+        String url = this.baseUrl + "/api/v3/lk/documents/create?pg=" + this.productGroup;
 
-        // Создаём HTTP-запрос
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json;charset=UTF-8")
@@ -164,7 +164,6 @@ public class CrptApi {
         }
     }
 
-    // === Внутренний record для тела запроса ===
 
     private record DocumentRequest(
             String type,
@@ -172,7 +171,7 @@ public class CrptApi {
             Object content,
             String signature
     ) {
-        // Jackson требует, чтобы поля были видны
+
     }
 
     // === Потокобезопасный Rate Limiter (Token Bucket) ===

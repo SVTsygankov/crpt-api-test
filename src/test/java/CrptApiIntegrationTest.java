@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class CrptApiIntegrationTest {
 
@@ -40,7 +41,7 @@ public class CrptApiIntegrationTest {
     @DisplayName("Должен успешно отправить документ при успешном ответе от API")
     void shouldCreateDocumentSuccessfully() throws Exception {
         // Arrange
-        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
+        CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 5);
         api.setAuthToken("test-token");
         api.setProductGroup("milk");
 
@@ -65,7 +66,8 @@ public class CrptApiIntegrationTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"error_message\": \"Invalid document\" }")));
 
-        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
+//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
+        CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 5);
         api.setAuthToken("test-token");
         api.setProductGroup("milk");
 
@@ -103,7 +105,8 @@ public class CrptApiIntegrationTest {
                 .whenScenarioStateIs("second-failed")
                 .willReturn(aResponse().withStatus(200)));
 
-        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
+//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
+        CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 5);
         api.setAuthToken("test-token");
         api.setProductGroup("milk");
 
@@ -124,8 +127,8 @@ public class CrptApiIntegrationTest {
         server.stubFor(post(urlPathEqualTo("/api/v3/lk/documents/create"))
                 .willReturn(aResponse().withStatus(200)));
 
-        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 2); // 2 в секунду
-        api.setAuthToken("test-token");
+//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 2); // 2 в секунду
+        CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 2);api.setAuthToken("test-token");
         api.setProductGroup("milk");
 
         var document = Map.of();
@@ -146,7 +149,7 @@ public class CrptApiIntegrationTest {
             });
         }
         executor.shutdown();
-        Assertions.assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
+        Assertions.assertTrue(executor.awaitTermination(10, SECONDS));
 
         long duration = System.currentTimeMillis() - start;
 
