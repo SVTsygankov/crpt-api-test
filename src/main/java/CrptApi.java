@@ -171,7 +171,7 @@ public class CrptApi {
             this.lastRefillTimestamp = System.currentTimeMillis();
         }
 
-        void acquire() throws InterruptedException {
+        void acquire() {
             while (true) {
                 lock.lock();
                 try {
