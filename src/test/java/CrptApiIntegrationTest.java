@@ -66,7 +66,6 @@ public class CrptApiIntegrationTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody("{ \"error_message\": \"Invalid document\" }")));
 
-//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
         CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 5);
         api.setAuthToken("test-token");
         api.setProductGroup("milk");
@@ -105,7 +104,6 @@ public class CrptApiIntegrationTest {
                 .whenScenarioStateIs("second-failed")
                 .willReturn(aResponse().withStatus(200)));
 
-//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 5);
         CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 5);
         api.setAuthToken("test-token");
         api.setProductGroup("milk");
@@ -127,7 +125,6 @@ public class CrptApiIntegrationTest {
         server.stubFor(post(urlPathEqualTo("/api/v3/lk/documents/create"))
                 .willReturn(aResponse().withStatus(200)));
 
-//        CrptApi api = new CrptApi(java.util.concurrent.TimeUnit.SECONDS, 2); // 2 в секунду
         CrptApi api = new CrptApi("http://localhost:8089", SECONDS, 2);api.setAuthToken("test-token");
         api.setProductGroup("milk");
 

@@ -22,11 +22,8 @@ public class CrptApi {
 
     private static final Logger logger = Logger.getLogger(CrptApi.class.getName());
 
-    // Базовый URL для создания документов
-//    private static final String BASE_URL = "https://ismp.crpt.ru/api/v3/lk/documents/create";
     private final String baseUrl;
 
-    // Товарная группа по умолчанию (можно задать через setter)
     private String productGroup = "milk"; // например, milk, shoes, tobacco и т.д.
 
     private final int requestLimit;
@@ -36,6 +33,10 @@ public class CrptApi {
     private final ObjectMapper objectMapper;
 
     private volatile String authToken;
+
+    public CrptApi(TimeUnit timeUnit, int requestLimit) {
+        this("https://ismp.crpt.ru", timeUnit, requestLimit);
+    }
 
     public CrptApi(String baseUrl, TimeUnit timeUnit, int requestLimit) {
         this.baseUrl = baseUrl;
@@ -89,7 +90,7 @@ public class CrptApi {
      * @throws InterruptedException если поток был прерван
      */
     public void createDocument(Object document, String signature) throws IOException, InterruptedException {
-        // Проверяем авторизацию
+
         if (this.authToken == null) {
             throw new IllegalStateException("authToken is not set. Call setAuthToken() before using the API.");
         }
@@ -170,11 +171,9 @@ public class CrptApi {
             String documentFormat,
             Object content,
             String signature
-    ) {
+    ) {}
 
-    }
-
-    // === Потокобезопасный Rate Limiter (Token Bucket) ===
+    // Rate Limiter (Token Bucket)
 
     private static class RateLimiter {
         private final int maxRequests;
@@ -190,7 +189,7 @@ public class CrptApi {
             this.lastRefillTimestamp = System.currentTimeMillis();
         }
 
-        void acquire() throws InterruptedException {
+        void acquire() {
             while (true) {
                 lock.lock();
                 try {
